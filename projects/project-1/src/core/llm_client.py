@@ -18,8 +18,9 @@ class AzureModel:
         response = self.client.chat.completions.create(
             model=self.deployment_name,  # ✅ aqui que usa o deployment
             messages=[
-                {"role": "user", "content": prompt}
-            ],
+    {"role": "system", "content": "Você é um especialista em compliance financeiro."},
+    {"role": "user", "content": prompt}
+],
             temperature=0.3
         )
 
