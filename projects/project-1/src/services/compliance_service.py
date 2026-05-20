@@ -31,7 +31,7 @@ RESPONDA APENAS EM JSON no formato:
         response = llm.invoke(prompt)
         texto = response.choices[0].message.content
 
-        # 🔥 CONVERTE JSON
+        # CONVERTE JSON
         data = json.loads(texto)
 
         return AnalysisResult(**data)
