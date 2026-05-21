@@ -1,9 +1,6 @@
 from fastapi import FastAPI
-from src.api.schemas import AnalysisRequest
-from src.services.compliance_service import analyze_recommendation
+from src.api.routes.analysis import router as analysis_router
 
 app = FastAPI()
 
-@app.post("/analyze")
-def analyze(request: AnalysisRequest):
-    return analyze_recommendation(request)
+app.include_router(analysis_router)

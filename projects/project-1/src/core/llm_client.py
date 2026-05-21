@@ -1,27 +1,52 @@
 import os
-from openai import AzureOpenAI
 from dotenv import load_dotenv
+from openai import AzureOpenAI
 
+# carrega variáveis do .env
 load_dotenv()
 
-class AzureModel:
-    def __init__(self):
-        self.client = AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_KEY"),
-            api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
-            azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-        )
+client = AzureOpenAI(
+    api_key=os.getenv("AZURE_OPENAI_KEY"),
+    api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
+)
 
-        self.deployment_name = os.getenv("AZURE_DEPLOYMENT_NAME")
+def analyze_with_ai(text: str) -> str:
 
-    def invoke(self, prompt: str):
-        response = self.client.chat.completions.create(
-            model=self.deployment_name,  # ✅ aqui que usa o deployment
-            messages=[
-    {"role": "system", "content": "Você é um especialista em compliance financeiro."},
-    {"role": "user", "content": prompt}
-],
-            temperature=0.3
-        )
+    # ✅ AQUI ENTRA O PROMPT
+    prompt = f"""
+    Você é um especialista em compliance financeiro com foco em análise de recomendações de investimento.
 
-        return response
+    OBJETIVO:
+    Avaliar se o texto está em conformidade com boas práticas de mercado.
+
+    CRITÉRIOS:
+    - Promessas de lucro garantido → NÃO compliant
+    - Ausência de risco → NÃO compliant
+    - Linguagem equilibrada → compliant
+
+    INSTRUÇÕES:
+    - Analise o texto de forma contextual
+    - Não baseie a decisão apenas em palavras isoladas
+    - Seja consistente
+
+    FORMATO:
+    Responda SOMENTE com JSON válido:
+
+    {{
+      "is_compliant": true,
+      "reason": "explicação clara",
+      "mentioned_products": ["lista"]
+    }}
+
+    TEXTO:
+    \"\"\"{text}\"\"\"
+    """
+
+    response = client.chat.completions.create(
+        model=os.getenv("AZURE_DEPLOYMENT_NAME"),
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+
+    return response.choices[0].message.content
