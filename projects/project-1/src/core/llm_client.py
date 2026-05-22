@@ -13,7 +13,7 @@ client = AzureOpenAI(
 
 def analyze_with_ai(text: str) -> str:
 
-    # ✅ AQUI ENTRA O PROMPT
+    # PROMPT definido para orientar a análise da IA
     prompt = f"""
     Você é um especialista em compliance financeiro com foco em análise de recomendações de investimento.
 
