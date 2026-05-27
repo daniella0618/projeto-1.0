@@ -3,12 +3,13 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def rerank(query: str, documents: list, top_k: int = 3):
-
     if not documents:
         return []
 
+    texts = [doc["text"] for doc in documents]
+
     vectorizer = TfidfVectorizer()
-    vectors = vectorizer.fit_transform(documents + [query]).toarray()
+    vectors = vectorizer.fit_transform(texts + [query]).toarray()
 
     query_vec = vectors[-1].reshape(1, -1)
     doc_vecs = vectors[:-1]
@@ -17,6 +18,4 @@ def rerank(query: str, documents: list, top_k: int = 3):
 
     ranked_idx = scores.argsort()[::-1]
 
-    ranked_docs = [documents[i] for i in ranked_idx[:top_k]]
-
-    return ranked_docs
+    return [documents[i] for i in ranked_idx[:top_k]]

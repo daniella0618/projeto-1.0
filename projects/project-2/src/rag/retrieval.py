@@ -1,40 +1,55 @@
+import os
 import chromadb
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 
-# ✅ usa o mesmo banco do ingestion
+# ✅ define caminho absoluto do banco
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma")
 
-client = chromadb.PersistentClient(path="./chroma")
+# ✅ conecta no banco certo
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 
-collection = client.get_or_create_collection("docs")
+# ✅ pega a collection já criada na ingestion
+collection = client.get_collection("docs")
 
 
 def retrieve(query: str, top_k: int = 3):
 
-    # ✅ pega os documentos do banco
-    data = collection.get(include=["documents"])
+    # ✅ buscar documentos e metadata
+    data = collection.get(include=["documents", "metadatas"])
+
     docs = data["documents"]
+    metas = data["metadatas"]
 
     print("📊 Total de docs no banco:", len(docs))
 
+    # ✅ proteção caso banco esteja vazio
     if not docs:
-        print("❌ Banco vazio!")
         return []
 
-    # ✅ cria embeddings juntos (docs + query)
+    # ✅ vetorizar docs + query
     vectorizer = TfidfVectorizer()
     vectors = vectorizer.fit_transform(docs + [query]).toarray()
 
     query_vec = vectors[-1].reshape(1, -1)
     doc_vecs = vectors[:-1]
 
-    # ✅ usa similaridade REAL (melhor que antes)
+    # ✅ calcular similaridade
     scores = cosine_similarity(doc_vecs, query_vec).flatten()
 
-    # ✅ pega os top resultados
+    # ✅ pegar índices mais relevantes
     top_idx = scores.argsort()[-top_k:][::-1]
 
-    results = [docs[i] for i in top_idx]
+    # ✅ montar resposta estruturada
+    results = [
+        {
+            "text": docs[i],
+            "source": metas[i]["source"],
+            "chunk_id": metas[i]["chunk_id"]
+        }
+        for i in top_idx
+    ]
 
     return results

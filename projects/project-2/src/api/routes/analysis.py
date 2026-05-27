@@ -4,15 +4,18 @@ from src.services.compliance_service import analyze_text
 
 router = APIRouter()
 
+
 @router.post("/analyze", response_model=AnalysisResponse)
 def analyze_recommendation(request: AnalysisRequest):
 
     try:
         result = analyze_text(request.text_to_analyze)
         return result
-    
-    except Exception:
-     raise HTTPException(
-    status_code=500,
-    detail="Erro interno no servidor"
+
+    except Exception as e:
+        print("ERRO REAL:", e)  # ✅ precisa estar indentado
+
+        raise HTTPException(
+            status_code=500,
+            detail=str(e)
         )

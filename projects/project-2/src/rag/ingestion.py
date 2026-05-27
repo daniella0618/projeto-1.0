@@ -3,7 +3,10 @@ import chromadb
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
-client = chromadb.PersistentClient(path="./chroma")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
+CHROMA_PATH = os.path.join(BASE_DIR, "chroma")
+
+client = chromadb.PersistentClient(path=CHROMA_PATH)
 
 try:
     client.delete_collection("docs")

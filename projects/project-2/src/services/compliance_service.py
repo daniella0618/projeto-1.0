@@ -1,18 +1,38 @@
 from src.core.llm_client import analyze_with_ai
-import json
+from src.rag.retrieval import retrieve
+from src.rag.reranker import rerank
 
-# Função que recebe o texto, chama a IA para análise e processa a resposta (separa a lógica de análise do restante da aplicação, facilitando testes e manutenção)
+
 def analyze_text(text: str) -> dict:
-    
-    # Envia o texto para a IA e recebe a resposta (utiliza a função definida no cliente de IA para obter a análise)
-    ai_response = analyze_with_ai(text)
 
-    try:
-        result = json.loads(ai_response)
-        return result
-    except:
-        return {
-            "is_compliant": False,
-            "reason": "Erro ao interpretar resposta da IA",
-            "mentioned_products": []
-        }
+    docs = retrieve(text)
+    docs = rerank(text, docs)
+
+    context = "\n".join([d["text"] for d in docs])
+
+    prompt = f"""
+    Analise o texto com base no contexto abaixo:
+
+    CONTEXTO:
+    {context}
+
+    TEXTO:
+    {text}
+
+    Explique se está em conformidade.
+    """
+
+    ai_response = analyze_with_ai(prompt)
+
+    return {
+        "is_compliant": False,
+        "reason": ai_response,
+        "mentioned_products": [],
+        "sources": [
+            {
+                "document": d["source"],
+                "chunk_id": d["chunk_id"]
+            }
+            for d in docs
+        ]
+    }

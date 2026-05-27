@@ -1,7 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List
 
-#Define um modelo de entrada da API
+
 class AnalysisRequest(BaseModel):
     text_to_analyze: str = Field(
         ...,
@@ -9,7 +9,12 @@ class AnalysisRequest(BaseModel):
         description="Texto da recomendação a ser analisada."
     )
 
-#Define um modelo de saída da API
+
+class Source(BaseModel):
+    document: str
+    chunk_id: str
+
+
 class AnalysisResponse(BaseModel):
     is_compliant: bool = Field(
         ...,
@@ -22,4 +27,8 @@ class AnalysisResponse(BaseModel):
     mentioned_products: List[str] = Field(
         default_factory=list,
         description="Lista de produtos mencionados."
+    )
+    sources: List[Source] = Field(
+        default_factory=list,
+        description="Fontes utilizadas na análise"
     )

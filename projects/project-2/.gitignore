@@ -34,3 +34,7 @@ docker-compose.yml
 *.swp
 *.swo
 *~
+
+# ChromaDB (banco vetorial)
+chroma/
+notebooks/chroma/
