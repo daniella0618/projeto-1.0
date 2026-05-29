@@ -2,7 +2,6 @@ import os
 import chromadb
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
 CHROMA_PATH = os.path.join(BASE_DIR, "chroma")
 
